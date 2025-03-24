@@ -10,8 +10,8 @@ const {
 
 router.post("/regisztracio", register);
 router.post("/login", login);
-router.post("/usertermekek", getAllUserTermek);
+router.get("/usertermekek", getAllUserTermek);
 //debughoz
-router.post("/alluser", getAllUser);
+router.get("/alluser", getAllUser);
 
 module.exports = router
