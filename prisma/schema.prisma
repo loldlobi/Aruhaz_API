@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id      Int            @id @default(autoincrement())
+  email        String
+  username     String
+  password     String
+  TermekekUser TermekekUser[]
+}
+
+model Kategoriak {
+  kategoria_id      Int                 @id @default(autoincrement())
+  kategori          String
+  KategoriaTermekek KategoriaTermekek[]
+}
+
+model KategoriaTermekek {
+  kategoria_id Int
+  termekek_id  Int
+  kategoria    Kategoriak @relation(fields: [kategoria_id], references: [kategoria_id])
+  termek       Termekek   @relation(fields: [termekek_id], references: [termekek_id])
+
+  @@id([kategoria_id, termekek_id])
+}
+
+model TermekekUser {
+  user_id     Int
+  termekek_id Int
+  user        User     @relation(fields: [user_id], references: [user_id])
+  termek      Termekek @relation(fields: [termekek_id], references: [termekek_id])
+
+  @@id([user_id, termekek_id])
+}
+
+model Termekek {
+  termekek_id       Int                 @id @default(autoincrement())
+  cim               String
+  description       String
+  ar                Int
+  KategoriaTermekek KategoriaTermekek[]
+  TermekekUser      TermekekUser[]
+}
