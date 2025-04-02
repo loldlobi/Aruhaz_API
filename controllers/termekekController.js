@@ -33,7 +33,6 @@ const termekDelete = async (req, res) => {
     try {
         const id = Number(req.params.id);
 
-        // Törlés végrehajtása
         const deletedProduct = await prisma.termekek.delete({
             where: { termekek_id: id }
         });
@@ -45,16 +44,25 @@ const termekDelete = async (req, res) => {
     } catch (error) {
         console.error("Törlési hiba:", error);
         res.status(500).json({
-            success: false,
-            error: "Szerverhiba",
-            details: error.message
+            message: error.message
         });
     }
+}
+
+const Termek = async (req, res) => {
+    const termekek_id = Number(req.params.id)
+    const termekek = await prisma.termekek.findUnique({
+        where: {
+            termekek_id: termekek_id
+        }
+    });
+    res.json(termekek)
 }
 
 module.exports = {
     allTermek,
     termekRegister,
     termekDelete,
+    Termek
 
 }

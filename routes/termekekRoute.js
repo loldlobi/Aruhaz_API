@@ -3,7 +3,8 @@ const router = express.Router();
 const {
     allTermek,
     termekRegister,
-    termekDelete
+    termekDelete,
+    Termek
 
 } = require('../controllers/termekekController');
 
@@ -11,5 +12,6 @@ const {
 router.get("/alltermek", allTermek)
 router.post("/createtermek",termekRegister)
 router.delete("/delete/:id",termekDelete)
+router.get("/termek/:id", Termek)
 
 module.exports = router
