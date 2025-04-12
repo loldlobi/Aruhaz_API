@@ -53,13 +53,9 @@ const termekRegister = async (req, res) => {
                 
                 // Check if image is too large (e.g., > 1MB)
                 if (rawBuffer.length > 1024 * 1024) {
-                    // Compress and resize the image
+                    // Compress the image without resizing
                     imageBuffer = await sharp(rawBuffer)
-                        .resize(800, 800, { // Resize to max 800x800
-                            fit: 'inside',
-                            withoutEnlargement: true
-                        })
-                        .jpeg({ quality: 80 }) // Convert to JPEG with 80% quality
+                        .jpeg({ quality: 100 }) // Convert to JPEG with 100% quality
                         .toBuffer();
                 } else {
                     imageBuffer = rawBuffer;
