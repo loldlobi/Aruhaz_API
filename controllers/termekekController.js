@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const sharp = require('sharp');
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
     errorFormat: 'pretty'
@@ -48,7 +49,21 @@ const termekRegister = async (req, res) => {
             try {
                 // Remove the data URL prefix if present
                 const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
-                imageBuffer = Buffer.from(base64Data, 'base64');
+                const rawBuffer = Buffer.from(base64Data, 'base64');
+                
+                // Check if image is too large (e.g., > 1MB)
+                if (rawBuffer.length > 1024 * 1024) {
+                    // Compress and resize the image
+                    imageBuffer = await sharp(rawBuffer)
+                        .resize(800, 800, { // Resize to max 800x800
+                            fit: 'inside',
+                            withoutEnlargement: true
+                        })
+                        .jpeg({ quality: 80 }) // Convert to JPEG with 80% quality
+                        .toBuffer();
+                } else {
+                    imageBuffer = rawBuffer;
+                }
             } catch (error) {
                 console.error("Hiba a kép konvertálása során:", error);
                 return res.status(400).json({
