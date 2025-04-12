@@ -4,7 +4,12 @@ const multer = require('multer');
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 15 * 1024 * 1024 // 15MB limit
+    }
+});
 
 const allTermek = async (req, res) => {
     try {
@@ -28,12 +33,22 @@ const allTermek = async (req, res) => {
 
 const termekRegister = async (req, res) => {
     try {
+        console.log("Request body:", req.body);
+        console.log("Request files:", req.files);
+
         const { cim, description, ar } = req.body;
-        const imageBuffer = req.file ? req.file.buffer : null;
+        const imageBuffer = req.files && req.files[0] ? req.files[0].buffer : null;
 
         // adat validáció
         if (!cim || !description || !ar) {
-            return res.json({ message: "Hiányos adatok!" });
+            return res.status(400).json({ 
+                message: "Hiányos adatok!",
+                missing: {
+                    cim: !cim,
+                    description: !description,
+                    ar: !ar
+                }
+            });
         }
 
         const newTermek = await prisma.termekek.create({
@@ -41,7 +56,7 @@ const termekRegister = async (req, res) => {
                 cim: cim,
                 description: description,
                 ar: parseInt(ar),
-                kep: imageBuffer ? Buffer.from(imageBuffer) : null
+                kep: imageBuffer
             }
         });
 
@@ -51,14 +66,16 @@ const termekRegister = async (req, res) => {
                 termekek_id: newTermek.termekek_id,
                 cim: newTermek.cim,
                 description: newTermek.description,
-                ar: newTermek.ar
+                ar: newTermek.ar,
+                hasImage: !!imageBuffer
             }
         });
     } catch (error) {
         console.error("Hiba a termék regisztrációja során:", error);
         res.status(500).json({
             message: "Hiba történt a termék regisztrációja során!",
-            error: error.message
+            error: error.message,
+            details: error
         });
     }
 }
