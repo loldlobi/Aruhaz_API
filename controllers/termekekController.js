@@ -1,19 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
-const multer = require('multer');
-
-// Create a single Prisma client instance
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
     errorFormat: 'pretty'
-});
-
-// Configure multer for memory storage
-const storage = multer.memoryStorage();
-const upload = multer({ 
-    storage: storage,
-    limits: {
-        fileSize: 15 * 1024 * 1024 // 15MB limit
-    }
 });
 
 const allTermek = async (req, res) => {
@@ -37,13 +25,10 @@ const allTermek = async (req, res) => {
 }
 
 const termekRegister = async (req, res) => {
-    let prismaClient;
     try {
         console.log("Request body:", req.body);
-        console.log("Request files:", req.files);
 
-        const { cim, description, ar } = req.body;
-        const imageBuffer = req.files && req.files[0] ? req.files[0].buffer : null;
+        const { cim, description, ar, image } = req.body;
 
         // adat validáció
         if (!cim || !description || !ar) {
@@ -57,16 +42,28 @@ const termekRegister = async (req, res) => {
             });
         }
 
-        // Create a new Prisma client for this request
-        prismaClient = new PrismaClient();
-        await prismaClient.$connect();
+        // Convert base64 to buffer if image exists
+        let imageBuffer = null;
+        if (image) {
+            try {
+                // Remove the data URL prefix if present
+                const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+                imageBuffer = Buffer.from(base64Data, 'base64');
+            } catch (error) {
+                console.error("Hiba a kép konvertálása során:", error);
+                return res.status(400).json({
+                    message: "Érvénytelen kép formátum!",
+                    error: error.message
+                });
+            }
+        }
 
-        const newTermek = await prismaClient.termekek.create({
+        const newTermek = await prisma.termekek.create({
             data: {
                 cim: cim,
                 description: description,
                 ar: parseInt(ar),
-                kep: imageBuffer ? Buffer.from(imageBuffer) : null
+                kep: imageBuffer
             }
         });
 
@@ -96,11 +93,6 @@ const termekRegister = async (req, res) => {
             error: error.message,
             code: error.code
         });
-    } finally {
-        // Always disconnect the Prisma client
-        if (prismaClient) {
-            await prismaClient.$disconnect().catch(console.error);
-        }
     }
 }
 
