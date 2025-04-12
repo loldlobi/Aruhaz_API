@@ -88,9 +88,35 @@ const getAllUserTermek = async (req, res) => {
     res.json(usertermekek)
 }
 
+const userProfil = async (req, res) => {
+    try {
+        const userId = Number(req.params.id);
+        const user = await prisma.user.findUnique({
+            select: {
+                user_id: true,
+                email: true,
+                username: true,
+            },
+            where: {
+                user_id: userId
+            }
+            
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "Felhasználó nem található!" });
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Hiba történt a profil lekérdezése során!", error: error.message });
+    }
+}
+
 module.exports = {
     register,
     login,
     getAllUser,
-    getAllUserTermek
+    getAllUserTermek,
+    userProfil
 }

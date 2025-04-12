@@ -5,7 +5,8 @@ const {
     register,
     login,
     getAllUser,
-    getAllUserTermek
+    getAllUserTermek,
+    userProfil
 } = require('../controllers/userController');
 
 router.post("/regisztracio", register);
@@ -13,5 +14,6 @@ router.post("/login", login);
 router.get("/usertermekek", protect, getAllUserTermek);
 //debughoz
 router.get("/alluser", getAllUser);
+router.get("/profil/:id", protect, userProfil);
 
 module.exports = router
