@@ -61,8 +61,12 @@ const termekRegister = async (req, res) => {
                     switch (format) {
                         case 'jpeg':
                         case 'jpg':
+                            // Handle both JPEG and JPG formats
                             imageBuffer = await sharp(rawBuffer)
-                                .jpeg({ quality: 100 })
+                                .jpeg({ 
+                                    quality: 100,
+                                    chromaSubsampling: '4:4:4' // Preserve full color information
+                                })
                                 .toBuffer();
                             break;
                         case 'png':
