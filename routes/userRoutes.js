@@ -10,7 +10,7 @@ const {
 
 router.post("/regisztracio", register);
 router.post("/login", login);
-router.get("/usertermekek", getAllUserTermek);
+router.get("/usertermekek", protect, getAllUserTermek);
 //debughoz
 router.get("/alluser", getAllUser);
 
