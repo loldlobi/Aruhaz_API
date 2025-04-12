@@ -41,13 +41,18 @@ const termekRegister = async (req, res) => {
                 cim: cim,
                 description: description,
                 ar: parseInt(ar),
-                kep: imageBuffer
+                kep: imageBuffer ? Buffer.from(imageBuffer) : null
             }
         });
 
         res.json({
             message: "Sikeres termék regisztráció!",
-            newTermek
+            newTermek: {
+                termekek_id: newTermek.termekek_id,
+                cim: newTermek.cim,
+                description: newTermek.description,
+                ar: newTermek.ar
+            }
         });
     } catch (error) {
         console.error("Hiba a termék regisztrációja során:", error);
