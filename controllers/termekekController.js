@@ -51,12 +51,37 @@ const termekRegister = async (req, res) => {
                 const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
                 const rawBuffer = Buffer.from(base64Data, 'base64');
                 
-                // Check if image is too large (e.g., > 1MB)
-                if (rawBuffer.length > 1024 * 1024) {
-                    // Compress the image while preserving original resolution
-                    imageBuffer = await sharp(rawBuffer)
-                        .jpeg({ quality: 100 }) // Convert to JPEG with 100% quality
-                        .toBuffer();
+                // Check if image is too large (e.g., > 20MB)
+                if (rawBuffer.length > 20 * 1024 * 1024) {
+                    // Get image format
+                    const metadata = await sharp(rawBuffer).metadata();
+                    const format = metadata.format;
+
+                    // Handle different image formats
+                    switch (format) {
+                        case 'jpeg':
+                        case 'jpg':
+                            imageBuffer = await sharp(rawBuffer)
+                                .jpeg({ quality: 100 })
+                                .toBuffer();
+                            break;
+                        case 'png':
+                            imageBuffer = await sharp(rawBuffer)
+                                .png({ quality: 100 })
+                                .toBuffer();
+                            break;
+                        case 'svg':
+                            // For SVG, we'll convert it to PNG since SVG is vector-based
+                            imageBuffer = await sharp(rawBuffer)
+                                .png({ quality: 100 })
+                                .toBuffer();
+                            break;
+                        default:
+                            // For any other format, convert to JPEG
+                            imageBuffer = await sharp(rawBuffer)
+                                .jpeg({ quality: 100 })
+                                .toBuffer();
+                    }
                 } else {
                     imageBuffer = rawBuffer;
                 }
