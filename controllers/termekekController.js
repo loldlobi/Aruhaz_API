@@ -51,8 +51,8 @@ const termekRegister = async (req, res) => {
                 const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
                 const rawBuffer = Buffer.from(base64Data, 'base64');
                 
-                // Check if image is too large (e.g., > 1MB)
-                if (rawBuffer.length > 1024 * 1024) {
+                // Check if image is too large (e.g., > 15MB)
+                if (rawBuffer.length > 15 * 1024 * 1024) {
                     // Compress the image without resizing
                     imageBuffer = await sharp(rawBuffer)
                         .jpeg({ quality: 100 }) // Convert to JPEG with 100% quality
