@@ -7,8 +7,23 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 const allTermek = async (req, res) => {
-    const termekek = await prisma.termekek.findMany();
-    res.json(termekek)
+    try {
+        const termekek = await prisma.termekek.findMany({
+            select: {
+                termekek_id: true,
+                cim: true,
+                description: true,
+                ar: true
+            }
+        });
+        res.json(termekek)
+    } catch (error) {
+        console.error("Hiba a termékek lekérdezése során:", error);
+        res.status(500).json({
+            message: "Hiba történt a termékek lekérdezése során!",
+            error: error.message
+        });
+    }
 }
 
 const termekRegister = async (req, res) => {
