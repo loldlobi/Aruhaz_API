@@ -4,12 +4,7 @@ const multer = require('multer');
 // Create a single Prisma client instance
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
-    errorFormat: 'pretty',
-    datasources: {
-        db: {
-            url: process.env.DATABASE_URL
-        }
-    }
+    errorFormat: 'pretty'
 });
 
 // Configure multer for memory storage
@@ -42,6 +37,7 @@ const allTermek = async (req, res) => {
 }
 
 const termekRegister = async (req, res) => {
+    let prismaClient;
     try {
         console.log("Request body:", req.body);
         console.log("Request files:", req.files);
@@ -61,12 +57,16 @@ const termekRegister = async (req, res) => {
             });
         }
 
-        const newTermek = await prisma.termekek.create({
+        // Create a new Prisma client for this request
+        prismaClient = new PrismaClient();
+        await prismaClient.$connect();
+
+        const newTermek = await prismaClient.termekek.create({
             data: {
                 cim: cim,
                 description: description,
                 ar: parseInt(ar),
-                kep: imageBuffer
+                kep: imageBuffer ? Buffer.from(imageBuffer) : null
             }
         });
 
@@ -96,6 +96,11 @@ const termekRegister = async (req, res) => {
             error: error.message,
             code: error.code
         });
+    } finally {
+        // Always disconnect the Prisma client
+        if (prismaClient) {
+            await prismaClient.$disconnect().catch(console.error);
+        }
     }
 }
 
