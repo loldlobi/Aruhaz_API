@@ -1,9 +1,16 @@
 const { PrismaClient } = require("@prisma/client");
+const multer = require('multer');
+
+// Create a single Prisma client instance
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
-    errorFormat: 'pretty'
+    errorFormat: 'pretty',
+    datasources: {
+        db: {
+            url: process.env.DATABASE_URL
+        }
+    }
 });
-const multer = require('multer');
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
@@ -54,9 +61,6 @@ const termekRegister = async (req, res) => {
             });
         }
 
-        // Test database connection
-        await prisma.$connect();
-
         const newTermek = await prisma.termekek.create({
             data: {
                 cim: cim,
@@ -65,9 +69,6 @@ const termekRegister = async (req, res) => {
                 kep: imageBuffer
             }
         });
-
-        // Close the connection
-        await prisma.$disconnect();
 
         res.json({
             message: "Sikeres termék regisztráció!",
@@ -82,9 +83,6 @@ const termekRegister = async (req, res) => {
     } catch (error) {
         console.error("Hiba a termék regisztrációja során:", error);
         
-        // Ensure connection is closed in case of error
-        await prisma.$disconnect().catch(console.error);
-
         // Handle specific Prisma errors
         if (error.code === 'P1017') {
             return res.status(503).json({
