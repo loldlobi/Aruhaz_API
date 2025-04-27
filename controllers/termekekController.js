@@ -141,6 +141,7 @@ const termekDelete = async (req, res) => {
         const id = Number(req.params.id);
 
         // Törlés végrehajtása
+        // Törlés végrehajtása
         const deletedProduct = await prisma.termekek.delete({
             where: { termekek_id: id }
         });

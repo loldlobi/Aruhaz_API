@@ -11,5 +11,5 @@ const {
 router.get("/alltermek", allTermek)
 router.post("/createtermek", protect, termekRegister)
 router.delete("/delete/:id", protect, termekDelete)
-
+//h
 module.exports = router

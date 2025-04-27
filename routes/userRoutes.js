@@ -15,5 +15,5 @@ router.get("/usertermekek", protect, getAllUserTermek);
 //debughoz
 router.get("/alluser", getAllUser);
 router.get("/profil/:id", protect, userProfil);
-
+//h
 module.exports = router
