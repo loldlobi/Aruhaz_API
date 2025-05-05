@@ -78,6 +78,8 @@ router.get("/alltermek", allTermek);
 // Több féle függvény van az 'upload' változóban, de a 'single()' függvény egyetlen egy bináris fájlt (képet) fog feldolgozni.
 // Ezt a fájlt le is fogja menteni a megadott helyre, ebben az esetben az 'uploads' mappába amit megadtunk és a megadott nével együtt amit megadtunk.
 // A 'fileSizeLimitErrorHandler' függvényt hívjuk ha hibát kapunk a képfeltöltésnél.
+
+//upload.array('image')
 router.post("/createtermek", protect, upload.single('image'), fileSizeLimitErrorHandler, termekRegister);
 router.get("/antermek/:id", anTermekSelect);
 router.delete("/delete/:id", protect, termekDelete);
