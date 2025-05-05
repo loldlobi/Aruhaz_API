@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('node:fs')
 const router = express.Router();
 const { protect } = require('../mwares/authMiddleware');
 
@@ -16,6 +17,10 @@ const multer = require("multer");
 const storage = multer.diskStorage({
     // Mentési hely
     destination: function (req, file, cb) {
+        //Létregozza az uploads mappát ha nem létezik
+        if (!fs.existsSync("./uploads/")) {
+            fs.mkdir("./uploads/")
+        }
         // Visszaküldjük a visszatérő függvénnyel a helyet, amit be akarunk állítani.
         cb(null, "./uploads/");
     },
