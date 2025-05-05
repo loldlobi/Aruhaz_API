@@ -26,76 +26,24 @@ const allTermek = async (req, res) => {
 }
 
 const termekRegister = async (req, res) => {
-    try {
-        console.log("Request body:", req.body);
+    console.log("Request body file:", req.file);
+    console.log("Request body:", req.body);
 
-        const { cim, description, ar, image } = req.body;
+    try {
+        const image = req.file;
+        const { cim, description, ar } = req.body;
 
         // adat validáció
-        if (!cim || !description || !ar) {
-            return res.status(400).json({ 
+        if (!cim || !description || !ar || !image) {
+            return res.status(400).json({
                 message: "Hiányos adatok!",
                 missing: {
                     cim: !cim,
                     description: !description,
-                    ar: !ar
+                    ar: !ar,
+                    image: !image
                 }
             });
-        }
-
-        // Convert base64 to buffer if image exists
-        let imageBuffer = null;
-        if (image) {
-            try {
-                // Remove the data URL prefix if present
-                const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
-                const rawBuffer = Buffer.from(base64Data, 'base64');
-                
-                // Check if image is too large (e.g., > 20MB)
-                if (rawBuffer.length > 20 * 1024 * 1024) {
-                    // Get image format
-                    const metadata = await sharp(rawBuffer).metadata();
-                    const format = metadata.format;
-
-                    // Handle different image formats
-                    switch (format) {
-                        case 'jpeg':
-                        case 'jpg':
-                            // Handle both JPEG and JPG formats
-                            imageBuffer = await sharp(rawBuffer)
-                                .jpeg({ 
-                                    quality: 100,
-                                    chromaSubsampling: '4:4:4' // Preserve full color information
-                                })
-                                .toBuffer();
-                            break;
-                        case 'png':
-                            imageBuffer = await sharp(rawBuffer)
-                                .png({ quality: 100 })
-                                .toBuffer();
-                            break;
-                        case 'svg':
-                            // For SVG, we'll convert it to PNG since SVG is vector-based
-                            imageBuffer = await sharp(rawBuffer)
-                                .png({ quality: 100 })
-                                .toBuffer();
-                            break;
-                        default:
-                            // For any other format, convert to JPEG
-                            imageBuffer = await sharp(rawBuffer)
-                                .jpeg({ quality: 100 })
-                                .toBuffer();
-                    }
-                } else {
-                    imageBuffer = rawBuffer;
-                }
-            } catch (error) {
-                console.error("Hiba a kép konvertálása során:", error);
-                return res.status(400).json({
-                    message: "Érvénytelen kép formátum!",
-                    error: error.message
-                });
-            }
         }
 
         const newTermek = await prisma.termekek.create({
@@ -103,7 +51,7 @@ const termekRegister = async (req, res) => {
                 cim: cim,
                 description: description,
                 ar: parseInt(ar),
-                kep: imageBuffer
+                kep: image.path
             }
         });
 
@@ -114,12 +62,12 @@ const termekRegister = async (req, res) => {
                 cim: newTermek.cim,
                 description: newTermek.description,
                 ar: newTermek.ar,
-                hasImage: !!imageBuffer
+                image: newTermek.kep
             }
         });
     } catch (error) {
         console.error("Hiba a termék regisztrációja során:", error);
-        
+
         // Handle specific Prisma errors
         if (error.code === 'P1017') {
             return res.status(503).json({

@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const argon2 = require('argon2');
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient()
+var isValidEmail = require('is-valid-email');
 
 const generateToken = (id) => {
     return jwt.sign({id}, "szupertitkostitok", {expiresIn: "1d"});
@@ -13,6 +14,9 @@ const register = async (req, res) => {
     if(!email || !username || !password){
         return res.json({message: "Hiányos adatok!"});
     }
+
+    if (!isValidEmail(email))
+        return res.json({message: "Nem helyes email cím!"});
 
     const user = await prisma.user.findFirst({
         where: {

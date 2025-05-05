@@ -47,7 +47,7 @@ model TermekekUser {
 
 model Termekek {
   termekek_id       Int                 @id @default(autoincrement())
-  kep               Bytes?
+  kep               String
   cim               String
   description       String
   ar                Int
