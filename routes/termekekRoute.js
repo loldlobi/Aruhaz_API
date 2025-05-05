@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         //Létregozza az uploads mappát ha nem létezik
         if (!fs.existsSync("./uploads/")) {
-            fs.mkdir("./uploads/")
+            fs.mkdirSync("./uploads/")
         }
         // Visszaküldjük a visszatérő függvénnyel a helyet, amit be akarunk állítani.
         cb(null, "./uploads/");
