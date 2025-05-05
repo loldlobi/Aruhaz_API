@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const sharp = require('sharp');
+const fs = require('fs');
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
     errorFormat: 'pretty'
@@ -7,14 +7,7 @@ const prisma = new PrismaClient({
 
 const allTermek = async (req, res) => {
     try {
-        const termekek = await prisma.termekek.findMany({
-            select: {
-                termekek_id: true,
-                cim: true,
-                description: true,
-                ar: true
-            }
-        });
+        const termekek = await prisma.termekek.findMany();
         res.json(termekek)
     } catch (error) {
         console.error("Hiba a termékek lekérdezése során:", error);
@@ -84,6 +77,38 @@ const termekRegister = async (req, res) => {
     }
 }
 
+const anTermekSelect = async (req, res) => {
+    try {
+        const terekId = Number(req.params.id);
+        const temek = await prisma.termekek.findUnique({
+            select: {
+                termekek_id: true,
+                kep: true,
+                cim: true,
+                description: true,
+                ar: true,
+            },
+            where: {
+                termekek_id: terekId
+            }
+            
+        });
+
+        if (!temek) {
+            return res.status(404).json({ message: "Termék nem található!" });
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Hiba történt a termék lekérdezése során!", error: error.message });
+    }
+}
+
+// const allTermek = async (req, res) => {
+//     const temek = await prisma.termekek.findMany();
+//     res.json(temek);
+// }
+
 const termekDelete = async (req, res) => {
     try {
         const id = Number(req.params.id);
@@ -93,6 +118,19 @@ const termekDelete = async (req, res) => {
         const deletedProduct = await prisma.termekek.delete({
             where: { termekek_id: id }
         });
+
+        fs.unlink(deletedProduct.kep, (err)=>{
+            if(!err){
+                return res.json({
+                    message:"sikeres tőrlés"
+                })
+            }
+            else{
+                return res.json({
+                    message:"sikertelen törlés"
+                })
+            }
+        })
 
         res.json({
             message: "sikeres termék törlés"
@@ -112,5 +150,6 @@ module.exports = {
     allTermek,
     termekRegister,
     termekDelete,
+    anTermekSelect,
 
 }

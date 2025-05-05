@@ -114,7 +114,6 @@ const userProfil = async (req, res) => {
         res.json(user);
     } catch (error) {
         res.status(500).json({ message: "Hiba történt a profil lekérdezése során!", error: error.message });
-        res.status(500).json({ message: "Hiba történt a profil lekérdezése során!", error: error.message });
     }
 }
 
