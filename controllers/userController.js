@@ -5,18 +5,18 @@ const prisma = new PrismaClient()
 var isValidEmail = require('is-valid-email');
 
 const generateToken = (id) => {
-    return jwt.sign({id}, "szupertitkostitok", {expiresIn: "1d"});
+    return jwt.sign({ id }, "szupertitkostitok", { expiresIn: "1d" });
 }
 
 const register = async (req, res) => {
-    const {email, username, password} = req.body
+    const { email, username, password } = req.body
 
-    if(!email || !username || !password){
-        return res.json({message: "Hiányos adatok!"});
+    if (!email || !username || !password) {
+        return res.status(404).json({ message: "Hiányos adatok!" });
     }
 
     if (!isValidEmail(email))
-        return res.json({message: "Nem helyes email cím!"});
+        return res.status(406).json({ message: "Nem helyes email cím!" });
 
     const user = await prisma.user.findFirst({
         where: {
@@ -24,8 +24,8 @@ const register = async (req, res) => {
         }
     });
 
-    if(user){
-        return res.json({message: "Email-cím már használatban!"});
+    if (user) {
+        return res.status(401).json({ message: "Email-cím már használatban!" });
     }
 
     const hash = await argon2.hash(password);
@@ -40,14 +40,14 @@ const register = async (req, res) => {
 
     res.json({
         message: "Sikeres regisztráció!",
-        newUser
+        newUser: newUser
     });
 }
 
 const login = async (req, res) => {
-    const {email, password} = req.body
-    if(!email || !password){
-        return res.json({
+    const { email, password } = req.body
+    if (!email || !password) {
+        return res.status(406).json({
             message: "Hiányzó adatok!"
         });
     }
@@ -59,8 +59,8 @@ const login = async (req, res) => {
 
 
 
-    if(!user){
-        return res.json({
+    if (!user) {
+        return res.status(404).json({
             message: "Nem létező fiók!"
         });
     }
@@ -68,15 +68,15 @@ const login = async (req, res) => {
 
     const passMatch = await argon2.verify(user.password, password);
 
-    if(passMatch){
-        const token = generateToken(user.id)
+    if (passMatch) {
+        const token = generateToken(user.user_id)
         return res.json({
             message: "Sikeres bejelentkezés!",
             username: user.username,
             token
         })
     } else {
-        return res.json({
+        return res.status(401).json({
             message: "Helytelen jelszó!"
         });
     }
@@ -88,7 +88,14 @@ const getAllUser = async (req, res) => {
 }
 
 const getAllUserTermek = async (req, res) => {
-    const usertermekek = await prisma.termekekUser.findMany()
+
+    console.log(req.user)
+    const usertermekek = await prisma.termekek.findMany({
+        where: {
+            user_id:
+                req.user.user_id
+        }
+    })
     res.json(usertermekek)
 }
 
@@ -104,7 +111,7 @@ const userProfil = async (req, res) => {
             where: {
                 user_id: userId
             }
-            
+
         });
 
         if (!user) {

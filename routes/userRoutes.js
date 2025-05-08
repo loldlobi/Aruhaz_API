@@ -13,7 +13,7 @@ router.post("/regisztracio", register);
 router.post("/login", login);
 router.get("/usertermekek", protect, getAllUserTermek);
 //debughoz
-router.get("/alluser", getAllUser);
+router.get("/alluser", protect, getAllUser);
 router.get("/profil/:id", protect, userProfil);
 //h
 module.exports = router

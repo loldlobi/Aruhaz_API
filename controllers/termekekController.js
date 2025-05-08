@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const { response } = require("express");
 const fs = require('fs');
 const prisma = new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
@@ -19,8 +20,8 @@ const allTermek = async (req, res) => {
 }
 
 const termekRegister = async (req, res) => {
-    console.log("Request body file:", req.file);
-    console.log("Request body:", req.body);
+    // console.log("Request body file:", req.file);
+    // console.log("Request body:", req.body);
 
     try {
         const image = req.file;
@@ -38,13 +39,14 @@ const termekRegister = async (req, res) => {
                 }
             });
         }
-
+        console.log(req.user)
         const newTermek = await prisma.termekek.create({
             data: {
                 cim: cim,
                 description: description,
                 ar: parseInt(ar),
-                kep: image.path
+                kep: image.path,
+                user_id: req.user.user_id
             }
         });
 
@@ -112,7 +114,14 @@ const anTermekSelect = async (req, res) => {
 const termekDelete = async (req, res) => {
     try {
         const id = Number(req.params.id);
-
+        const getToBeDeletedProduct = await prisma.termekek.findFirst({
+            where: {
+                user_id: id
+            }
+        });
+        if (getToBeDeletedProduct.user_id != req.user.user_id) {
+            return res.status(403).json({message:"nem te vagy a felhasználó aki ezt feltöltötte???!!!!"})
+        }
         // Törlés végrehajtása
         // Törlés végrehajtása
         const deletedProduct = await prisma.termekek.delete({
@@ -121,18 +130,19 @@ const termekDelete = async (req, res) => {
 
         fs.unlink(deletedProduct.kep, (err)=>{
             if(!err){
-                return res.json({
+                return res.status(200).json({
                     message:"sikeres tőrlés"
                 })
             }
             else{
-                return res.json({
-                    message:"sikertelen törlés"
+                return res.status(404).json({
+                    message:"sikertelen törlés",
+                    errmessage: err.message
                 })
             }
         })
 
-        res.json({
+        res.status(200).json({
             message: "sikeres termék törlés"
         });
 

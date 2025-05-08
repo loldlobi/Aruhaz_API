@@ -14,11 +14,11 @@ datasource db {
 }
 
 model User {
-  user_id      Int            @id @default(autoincrement())
-  email        String
-  username     String
-  password     String
-  TermekekUser TermekekUser[]
+  user_id  Int        @id @default(autoincrement())
+  email    String
+  username String
+  password String
+  Termekek Termekek[]
 }
 
 model Kategoriak {
@@ -36,22 +36,15 @@ model KategoriaTermekek {
   @@id([kategoria_id, termekek_id])
 }
 
-model TermekekUser {
-  user_id     Int
-  termekek_id Int
-  user        User     @relation(fields: [user_id], references: [user_id])
-  termek      Termekek @relation(fields: [termekek_id], references: [termekek_id])
-
-  @@id([user_id, termekek_id])
-}
-
 model Termekek {
   termekek_id       Int                 @id @default(autoincrement())
   kep               String
   cim               String
   description       String
   ar                Int
+  user_id           Int
+  user              User                @relation(fields: [user_id], references: [user_id])
   KategoriaTermekek KategoriaTermekek[]
-  TermekekUser      TermekekUser[]
 }
+
 //h
