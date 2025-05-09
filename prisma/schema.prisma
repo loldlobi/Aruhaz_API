@@ -30,5 +30,3 @@ model Termekek {
   user_id           Int
   user              User                @relation(fields: [user_id], references: [user_id])
 }
-
-//h
