@@ -12,8 +12,9 @@ const {
 router.post("/regisztracio", register);
 router.post("/login", login);
 router.get("/usertermekek", protect, getAllUserTermek);
+router.get("/profil/:id", protect, userProfil);
 //debughoz
 router.get("/alluser", protect, getAllUser);
-router.get("/profil/:id", protect, userProfil);
+
 //h
 module.exports = router
