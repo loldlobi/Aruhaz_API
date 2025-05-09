@@ -73,7 +73,8 @@ const {
     allTermek,
     termekRegister,
     termekDelete,
-    anTermekSelect
+    anTermekSelect,
+    termekUpdate
 } = require('../controllers/termekekController');
 
 router.get("/alltermek", allTermek);
@@ -88,5 +89,6 @@ router.get("/alltermek", allTermek);
 router.post("/createtermek", protect, upload.single('image'), fileSizeLimitErrorHandler, termekRegister);
 router.get("/antermek/:id", anTermekSelect);
 router.delete("/delete/:id", protect, termekDelete);
+router.patch("/update/:id", protect, upload.single('image'), termekUpdate);
 //h
 module.exports = router;

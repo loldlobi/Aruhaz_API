@@ -73,6 +73,7 @@ const login = async (req, res) => {
         return res.json({
             message: "Sikeres bejelentkezés!",
             username: user.username,
+            user_id: user.user_id,
             token
         })
     } else {

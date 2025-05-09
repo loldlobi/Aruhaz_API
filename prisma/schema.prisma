@@ -21,21 +21,6 @@ model User {
   Termekek Termekek[]
 }
 
-model Kategoriak {
-  kategoria_id      Int                 @id @default(autoincrement())
-  kategori          String
-  KategoriaTermekek KategoriaTermekek[]
-}
-
-model KategoriaTermekek {
-  kategoria_id Int
-  termekek_id  Int
-  kategoria    Kategoriak @relation(fields: [kategoria_id], references: [kategoria_id])
-  termek       Termekek   @relation(fields: [termekek_id], references: [termekek_id])
-
-  @@id([kategoria_id, termekek_id])
-}
-
 model Termekek {
   termekek_id       Int                 @id @default(autoincrement())
   kep               String
@@ -44,7 +29,6 @@ model Termekek {
   ar                Int
   user_id           Int
   user              User                @relation(fields: [user_id], references: [user_id])
-  KategoriaTermekek KategoriaTermekek[]
 }
 
 //h

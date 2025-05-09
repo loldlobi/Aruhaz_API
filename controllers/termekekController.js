@@ -93,7 +93,7 @@ const anTermekSelect = async (req, res) => {
             where: {
                 termekek_id: terekId
             }
-            
+
         });
 
         if (!temek) {
@@ -114,13 +114,17 @@ const anTermekSelect = async (req, res) => {
 const termekDelete = async (req, res) => {
     try {
         const id = Number(req.params.id);
+
+        if (!id)
+            return res.status(406).json({ message: "Hiányzó adatok!" });
+
         const getToBeDeletedProduct = await prisma.termekek.findFirst({
             where: {
-                user_id: id
+                termekek_id: id
             }
         });
         if (getToBeDeletedProduct.user_id != req.user.user_id) {
-            return res.status(403).json({message:"nem te vagy a felhasználó aki ezt feltöltötte???!!!!"})
+            return res.status(403).json({ message: "nem te vagy a felhasználó aki ezt feltöltötte???!!!!" })
         }
         // Törlés végrehajtása
         // Törlés végrehajtása
@@ -128,26 +132,88 @@ const termekDelete = async (req, res) => {
             where: { termekek_id: id }
         });
 
-        fs.unlink(deletedProduct.kep, (err)=>{
-            if(!err){
-                return res.status(200).json({
-                    message:"sikeres tőrlés"
-                })
+        fs.unlink(deletedProduct.kep, (err) => {
+            if (!err) {
+                return res.json({
+                    message: "sikeres tőrlés"
+                });
             }
-            else{
+            else {
                 return res.status(404).json({
-                    message:"sikertelen törlés",
+                    message: "sikertelen törlés",
                     errmessage: err.message
-                })
+                });
             }
         })
-
-        res.status(200).json({
-            message: "sikeres termék törlés"
-        });
-
     } catch (error) {
         console.error("Törlési hiba:", error);
+        res.status(500).json({
+            success: false,
+            error: "Szerverhiba",
+            details: error.message
+        });
+    }
+}
+
+const termekUpdate = async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+
+        const image = req.file;
+        const { cim, description, ar } = req.body;
+
+        // adat validáció
+        if (!cim || !description || !ar || !image) {
+            return res.status(400).json({
+                message: "Hiányos adatok!",
+                missing: {
+                    cim: !cim,
+                    description: !description,
+                    ar: !ar,
+                    image: !image
+                }
+            });
+        }
+
+        if (!id)
+            return res.status(406).json({ message: "Hiányzó adatok!" });
+
+        const getToBeUpdatedProduct = await prisma.termekek.findFirst({
+            where: {
+                termekek_id: id
+            }
+        });
+        
+        if (getToBeUpdatedProduct.user_id != req.user.user_id) {
+            return res.status(403).json({ message: "nem te vagy a felhasználó aki ezt feltöltötte???!!!!" })
+        }
+        // Törlés végrehajtása
+        // Törlés végrehajtása
+        fs.unlink(getToBeUpdatedProduct.kep, async (err) => {
+            if (!err) {
+                const updatedProduct = await prisma.termekek.update({
+                    where: { termekek_id: id },
+                    data: {
+                        cim: cim,
+                        ar: parseInt(ar),
+                        description: description,
+                        kep: image.path
+                    }
+                });
+
+                return res.json({
+                    message: "sikeres módosítás"
+                });
+            }
+            else {
+                return res.status(404).json({
+                    message: "sikertelen törlés",
+                    errmessage: err.message
+                });
+            }
+        })
+    } catch (error) {
+        console.error("Módosítási hiba:", error);
         res.status(500).json({
             success: false,
             error: "Szerverhiba",
@@ -161,5 +227,5 @@ module.exports = {
     termekRegister,
     termekDelete,
     anTermekSelect,
-
+    termekUpdate
 }
