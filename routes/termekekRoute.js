@@ -85,10 +85,9 @@ router.get("/alltermek", allTermek);
 // Ezt a fájlt le is fogja menteni a megadott helyre, ebben az esetben az 'uploads' mappába amit megadtunk és a megadott nével együtt amit megadtunk.
 // A 'fileSizeLimitErrorHandler' függvényt hívjuk ha hibát kapunk a képfeltöltésnél.
 
-//upload.array('image')
 router.post("/createtermek", protect, upload.single('image'), fileSizeLimitErrorHandler, termekRegister);
 router.get("/antermek/:id", anTermekSelect);
 router.delete("/delete/:id", protect, termekDelete);
 router.patch("/update/:id", protect, upload.single('image'), termekUpdate);
-//h
+
 module.exports = router;
