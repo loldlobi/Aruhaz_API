@@ -124,7 +124,7 @@ const termekDelete = async (req, res) => {
             }
         });
         if (getToBeDeletedProduct.user_id != req.user.user_id) {
-            return res.status(403).json({ message: "nem te vagy a felhasználó aki ezt feltöltötte???!!!!" })
+            return res.status(403).json({ message: "Nem te vagy a user aki ezt feltöltötte!" })
         }
         // Törlés végrehajtása
         // Törlés végrehajtása
